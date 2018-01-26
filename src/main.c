@@ -18,7 +18,7 @@ http://cep.xor.aps.anl.gov/software/qt4-x11-4.2.2/qtopiacore-testingframebuffer.
 #include <sys/ioctl.h>
 
 #define HEIGHT 500
-#define WIDTH 833.33
+#define WIDTH 800
 #define INIT_HEIGHT 100
 #define INIT_WIDTH 100
 
@@ -31,7 +31,7 @@ long int location = 0;
 
 void init();
 void clearScreen();
-void printpixel(int x, int y);
+void printpixel(int x, int y, int color);
 void bres_line(int x1, int y1, int x2, int y2, int thickness);
 
 int main() {
@@ -83,29 +83,21 @@ void init(){
 
 //clearScreen
 void clearScreen() {
-	for (int h = 0; h < HEIGHT; h++)
-		for (int w = 0; w < WIDTH; w++) {
-
-			location = (w + INIT_WIDTH + vinfo.xoffset) * (vinfo.bits_per_pixel/8) +
-				(h + INIT_HEIGHT + vinfo.yoffset) * finfo.line_length;
-
-			if (vinfo.bits_per_pixel == 32) {
-				*(fbp + location) = 255;
-				*(fbp + location + 1) = 255;
-				*(fbp + location + 2) = 255;
-				*(fbp + location + 3) = 0;
-			}
-		}
+    for (int h = 0; h < HEIGHT; h++){
+        for (int w = 0; w < WIDTH; w++) {
+            printpixel(w,h,255);
+        }
+    }
 }
 
-void printpixel(int x, int y){
+void printpixel(int x, int y, int color){
     location = (x+vinfo.xoffset) * (vinfo.bits_per_pixel/8) +
                        (y+vinfo.yoffset) * finfo.line_length;
 
     if (vinfo.bits_per_pixel == 32) {
-        *(fbp + location) = 0;
-        *(fbp + location + 1) = 0;
-        *(fbp + location + 2) = 0;
+        *(fbp + location) = color;
+        *(fbp + location + 1) = color;
+        *(fbp + location + 2) = color;
         *(fbp + location + 3) = 0;
     }
 }
@@ -130,7 +122,7 @@ void bres_line(int x1, int y1, int x2, int y2, int thickness){
             x_end = x2 + i;
         }
     
-        printpixel(x,y);
+        printpixel(x,y,0);
         while(x < x_end){
             x++;
             if(p < 0){
@@ -140,7 +132,7 @@ void bres_line(int x1, int y1, int x2, int y2, int thickness){
                 p = p + const2;
             }
         
-            printpixel(x,y);
+            printpixel(x,y,0);
         }
     }
 }
