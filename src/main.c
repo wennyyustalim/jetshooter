@@ -18,7 +18,7 @@ http://cep.xor.aps.anl.gov/software/qt4-x11-4.2.2/qtopiacore-testingframebuffer.
 #include <sys/ioctl.h>
 
 #define HEIGHT 500
-#define WIDTH 833.33
+#define WIDTH 800
 #define INIT_HEIGHT 100
 #define INIT_WIDTH 100
 
@@ -31,14 +31,15 @@ long int location = 0;
 
 void init();
 void clearScreen();
-void printpixel(int x, int y);
-void bres_line(int x1, int y1, int x2, int y2);
+void printpixel(int x, int y, int color);
+void bres_line(int x1, int y1, int x2, int y2, int thickness);
 
 int main() {
     // Open the file for reading and writing
-    init();
-    clearScreen();
-    bres_line(100,100,500,700);
+
+    init();   
+    clearScreen();    
+    bres_line(100,100,500,700,30);
 
     munmap(fbp, screensize);
     close(fbfd);
@@ -82,63 +83,56 @@ void init(){
 
 //clearScreen
 void clearScreen() {
-	for (int h = 0; h < HEIGHT; h++)
-		for (int w = 0; w < WIDTH; w++) {
-
-			location = (w + INIT_WIDTH + vinfo.xoffset) * (vinfo.bits_per_pixel/8) +
-				(h + INIT_HEIGHT + vinfo.yoffset) * finfo.line_length;
-
-			if (vinfo.bits_per_pixel == 32) {
-				*(fbp + location) = 255;
-				*(fbp + location + 1) = 255;
-				*(fbp + location + 2) = 255;
-				*(fbp + location + 3) = 0;
-			}
-		}
+    for (int h = 0; h < HEIGHT; h++){
+        for (int w = 0; w < WIDTH; w++) {
+            printpixel(w,h,255);
+        }
+    }
 }
 
-void printpixel(int x, int y){
+void printpixel(int x, int y, int color){
     location = (x+vinfo.xoffset) * (vinfo.bits_per_pixel/8) +
                        (y+vinfo.yoffset) * finfo.line_length;
 
     if (vinfo.bits_per_pixel == 32) {
-        *(fbp + location) = 255;
-        *(fbp + location + 1) = 255;
-        *(fbp + location + 2) = 255;
+        *(fbp + location) = color;
+        *(fbp + location + 1) = color;
+        *(fbp + location + 2) = color;
         *(fbp + location + 3) = 0;
     }
 }
 
-void bres_line(int x1, int y1, int x2, int y2){
-    int dx, dy, x, y, x_end, p, const1, const2;
+void bres_line(int x1, int y1, int x2, int y2, int thickness){
+    int dx, dy, x, y, x_end, p, const1, const2, i;
+    for(i = 0; i < thickness; i++){
+        dx = abs(x1-x2);
+        dy = abs(y1-y2);
     
-    dx = abs(x1-x2);
-    dy = abs(y1-y2);
-    
-    p = 2 * dy - dx;
-    const1 = 2 * dy;
-    const2 = 2 * (dy-dx);
+        p = 2 * dy - dx;
+        const1 = 2 * dy;
+        const2 = 2 * (dy-dx);
 
-    if(x1 > x2){
-        x = x2;
-        y = y2;
-        x_end = x1;
-    }else{
-        x = x1;
-        y = y1;
-        x_end = x2;
-    }
-    
-    printpixel(x,y);
-    while(x < x_end){
-        x++;
-        if(p < 0){
-            p = p + const1;
+        if(x1 > x2){
+            x = x2 + i;
+            y = y2;
+            x_end = x1 + i;
         }else{
-            y++;
-            p = p + const2;
+            x = x1 + i;
+            y = y1;
+            x_end = x2 + i;
         }
+    
+        printpixel(x,y,0);
+        while(x < x_end){
+            x++;
+            if(p < 0){
+                p = p + const1;
+            }else{
+                y++;
+                p = p + const2;
+            }
         
-        printpixel(x,y);
+            printpixel(x,y,0);
+        }
     }
 }
