@@ -17,6 +17,11 @@ http://cep.xor.aps.anl.gov/software/qt4-x11-4.2.2/qtopiacore-testingframebuffer.
 #include <sys/mman.h>
 #include <sys/ioctl.h>
 
+#define HEIGHT 500
+#define WIDTH 833.33
+#define INIT_HEIGHT 100
+#define INIT_WIDTH 100
+
 struct fb_var_screeninfo vinfo;
 struct fb_fix_screeninfo finfo;
 char *fbp = 0;
@@ -25,14 +30,17 @@ long int screensize = 0;
 long int location = 0;
 
 void init();
+void clearScreen();
 void printpixel(int x, int y);
 void bres_line(int x1, int y1, int x2, int y2, int thickness);
 
-int main()
-{
+int main() {
     // Open the file for reading and writing
+
     init();   
+    clearScreen();    
     bres_line(100,100,500,700,30);
+
     munmap(fbp, screensize);
     close(fbfd);
     return 0;
@@ -71,6 +79,23 @@ void init(){
     }
     printf("The framebuffer device was mapped to memory successfully.\n");
 
+}
+
+//clearScreen
+void clearScreen() {
+	for (int h = 0; h < HEIGHT; h++)
+		for (int w = 0; w < WIDTH; w++) {
+
+			location = (w + INIT_WIDTH + vinfo.xoffset) * (vinfo.bits_per_pixel/8) +
+				(h + INIT_HEIGHT + vinfo.yoffset) * finfo.line_length;
+
+			if (vinfo.bits_per_pixel == 32) {
+				*(fbp + location) = 255;
+				*(fbp + location + 1) = 255;
+				*(fbp + location + 2) = 255;
+				*(fbp + location + 3) = 0;
+			}
+		}
 }
 
 void printpixel(int x, int y){
