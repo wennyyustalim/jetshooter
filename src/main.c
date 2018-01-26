@@ -38,8 +38,13 @@ int main() {
     // Open the file for reading and writing
 
     init();   
-    clearScreen();    
-    bres_line(100,100,500,700,30);
+    clearScreen();
+    int x = 100;
+    for (int y = 100; y < 300; y++) {
+    	clearScreen();
+	    bres_line(x,y,x+20,y+10,3);
+	    x += 2;
+    }
 
     munmap(fbp, screensize);
     close(fbfd);
