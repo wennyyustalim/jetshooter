@@ -34,6 +34,7 @@ void init();
 void clearScreen();
 void printpixel(int x, int y, int color);
 void bres_line(int x1, int y1, int x2, int y2, int thickness);
+void printPesawat(int kolom, int banyakBaris, int banyakKolom);
 
 char a[1000][1000];
 
@@ -44,35 +45,34 @@ int main() {
     FILE *fp;
     int i,j;
     
-    fp = fopen("./jet.txt","r");
+    fp = fopen("../outputJet.txt","r");
     if(fp==NULL){
     	printf("File tidak ada\n");
     	return 0;
     }
     i = 0;
-    for(i=0;i<52;i++){
-    	fscanf(fp, "%s", a[i]);
-    	
-    	printf("%s\n",a[i]);
-    	printf("i: %d\n",i);
+    while(fscanf(fp, "%s", a[i])!=EOF){
+    	i++;
     }
 
     int idx = i;
-    for(i=0;i<idx;i++){
-    	if(strlen(a[i])>0){
-    		printf("panjang idx i:%d : %d\n",i,(int)strlen(a[i]));
-    		printf("%s\n",a[i]);
-    	}
-    }
-
+    int ukuranBaris = idx, ukuranKolom = strlen(a[0]);
     clearScreen();
-    int x = 100;
-    for (int y = 100; y < 300; y++) {
-    	clearScreen();
-	    bres_line(x,y,x+20,y+10,3);
-	    x += 2;
-    }
+    int kolom = 700;
+    while(1){
+    	int x = 100;
+	    for (int y = 100; y < 300; y++) {
+	    	clearScreen();
+	    	printPesawat(kolom,ukuranBaris,ukuranKolom);
+	    	kolom--;
+	    	if(kolom<0){kolom=700;}
+		    bres_line(x,y,x+20,y+10,3);
+		    x += 2;
+		    usleep(1000);
+	    }
 
+		
+    }
     munmap(fbp, screensize);
     close(fbfd);
     return 0;
@@ -167,4 +167,18 @@ void bres_line(int x1, int y1, int x2, int y2, int thickness){
             printpixel(x,y,0);
         }
     }
+}
+
+void printPesawat(int kolom, int banyakBaris, int banyakKolom){
+	int i,j;
+	int y = 0, x = kolom;
+	for(i=0;i<banyakBaris;i++){
+		for(j=0;j<banyakKolom;j++){
+			char kar = a[i][j];
+			if(kar=='0'){printpixel(x,y,0);}
+			x++;
+		}
+		y++;
+		x = kolom;
+	}
 }

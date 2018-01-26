@@ -21,7 +21,7 @@ int main(){
 	i=0;
 	memset(hasil,0,sizeof hasil);
 	
-	freopen("../jet.txt","r",stdin);
+	freopen("./jet.txt","r",stdin);
 	while(getline(cin,input[i])){
 		for(j=0;j<input[i].length();j++){
 			if(input[i][j]!=' '){hasil[i][j] = 0;}
