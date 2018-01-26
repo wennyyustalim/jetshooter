@@ -60,14 +60,27 @@ int main() {
     clearScreen();
     int kolom = 700;
     while(1){
-    	int x = 100;
-	    for (int y = 100; y < 300; y++) {
+    	int x = WIDTH/2;
+    	int xTengah = WIDTH/2;
+    	int xKanan = WIDTH/2;
+	    for (int y = HEIGHT; y >100; y--) {
 	    	clearScreen();
 	    	printPesawat(kolom,ukuranBaris,ukuranKolom);
 	    	kolom--;
 	    	if(kolom<0){kolom=700;}
-		    bres_line(x,y,x+20,y+10,3);
-		    x += 2;
+
+	    	//printing ke kiri atas
+	    	if(x<20){break;}
+		    bres_line(x,y,x-20,y-10,3);
+		    x -= 2;
+
+		    //printing ke atas
+		    bres_line(xTengah,y,xTengah,y-10,10);
+
+		    //printing ke kanan atas
+		    bres_line(xKanan,y,xKanan+20,y-10, 5);
+		    xKanan += 2;
+		    
 		    usleep(1000);
 	    }
 
