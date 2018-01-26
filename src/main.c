@@ -26,13 +26,13 @@ long int location = 0;
 
 void init();
 void printpixel(int x, int y);
-void bres_line(int x1, int y1, int x2, int y2);
+void bres_line(int x1, int y1, int x2, int y2, int thickness);
 
 int main()
 {
     // Open the file for reading and writing
     init();   
-    bres_line(100,100,500,700);
+    bres_line(100,100,500,700,30);
     munmap(fbp, screensize);
     close(fbfd);
     return 0;
@@ -78,43 +78,44 @@ void printpixel(int x, int y){
                        (y+vinfo.yoffset) * finfo.line_length;
 
     if (vinfo.bits_per_pixel == 32) {
-        *(fbp + location) = 255;
-        *(fbp + location + 1) = 255;
-        *(fbp + location + 2) = 255;
+        *(fbp + location) = 0;
+        *(fbp + location + 1) = 0;
+        *(fbp + location + 2) = 0;
         *(fbp + location + 3) = 0;
     }
 }
 
-void bres_line(int x1, int y1, int x2, int y2){
-    int dx, dy, x, y, x_end, p, const1, const2;
+void bres_line(int x1, int y1, int x2, int y2, int thickness){
+    int dx, dy, x, y, x_end, p, const1, const2, i;
+    for(i = 0; i < thickness; i++){
+        dx = abs(x1-x2);
+        dy = abs(y1-y2);
     
-    dx = abs(x1-x2);
-    dy = abs(y1-y2);
-    
-    p = 2 * dy - dx;
-    const1 = 2 * dy;
-    const2 = 2 * (dy-dx);
+        p = 2 * dy - dx;
+        const1 = 2 * dy;
+        const2 = 2 * (dy-dx);
 
-    if(x1 > x2){
-        x = x2;
-        y = y2;
-        x_end = x1;
-    }else{
-        x = x1;
-        y = y1;
-        x_end = x2;
-    }
-    
-    printpixel(x,y);
-    while(x < x_end){
-        x++;
-        if(p < 0){
-            p = p + const1;
+        if(x1 > x2){
+            x = x2 + i;
+            y = y2;
+            x_end = x1 + i;
         }else{
-            y++;
-            p = p + const2;
+            x = x1 + i;
+            y = y1;
+            x_end = x2 + i;
         }
-        
+    
         printpixel(x,y);
+        while(x < x_end){
+            x++;
+            if(p < 0){
+                p = p + const1;
+            }else{
+                y++;
+                p = p + const2;
+            }
+        
+            printpixel(x,y);
+        }
     }
 }
