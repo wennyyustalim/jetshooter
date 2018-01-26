@@ -16,6 +16,7 @@ http://cep.xor.aps.anl.gov/software/qt4-x11-4.2.2/qtopiacore-testingframebuffer.
 #include <linux/fb.h>
 #include <sys/mman.h>
 #include <sys/ioctl.h>
+#include <string.h>
 
 #define HEIGHT 500
 #define WIDTH 800
@@ -34,10 +35,36 @@ void clearScreen();
 void printpixel(int x, int y, int color);
 void bres_line(int x1, int y1, int x2, int y2, int thickness);
 
+char a[1000][1000];
+
 int main() {
     // Open the file for reading and writing
 
-    init();   
+    init();
+    FILE *fp;
+    int i,j;
+    
+    fp = fopen("./jet.txt","r");
+    if(fp==NULL){
+    	printf("File tidak ada\n");
+    	return 0;
+    }
+    i = 0;
+    for(i=0;i<52;i++){
+    	fscanf(fp, "%s", a[i]);
+    	
+    	printf("%s\n",a[i]);
+    	printf("i: %d\n",i);
+    }
+
+    int idx = i;
+    for(i=0;i<idx;i++){
+    	if(strlen(a[i])>0){
+    		printf("panjang idx i:%d : %d\n",i,(int)strlen(a[i]));
+    		printf("%s\n",a[i]);
+    	}
+    }
+
     clearScreen();    
     bres_line(100,100,500,700,30);
 
