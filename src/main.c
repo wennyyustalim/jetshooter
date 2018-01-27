@@ -32,19 +32,32 @@ long int location = 0;
 
 void init();
 void clearScreen();
-void printPixel(int x, int y, int color);
-void bresLine(int x1, int y1, int x2, int y2, int thickness);
+void printpixelBG(int x, int y, int colorR, int colorG, int colorB);
+void printpixel(int x, int y, int color);
+void bres_line(int x1, int y1, int x2, int y2, int thickness);
 void printPesawat(int kolom, int banyakBaris, int banyakKolom);
 
 char a[1000][1000];
+char bg[1000][1000];
 
 int main() {
     // Open the file for reading and writing
 
     init();   
-    FILE *fp;
+    FILE *fp, *fbg;
     int i,j;
     
+    fbg = fopen("../background.txt","r");
+    if (fbg == NULL){
+		printf("No data in bg.txt\n");
+		return 0;
+	}
+	else{
+		i = 0;
+		while (fscanf(fbg, "%s",bg[i]) != EOF){
+			i++;
+		}
+	}
     fp = fopen("../outputJet.txt","r");
     if(fp==NULL){
     	printf("File tidak ada\n");
@@ -59,14 +72,6 @@ int main() {
     int ukuranBaris = idx, ukuranKolom = strlen(a[0]);
     clearScreen();
     int kolom = 700;
-
-    
-/*sample
-    bres_line(100,200,200,100,10);
-    bres_line(200,200,100,100,10);
-    bres_line(100,100,100,200,10);
-    bres_line(200,100,100,100,10);
-*/
     while(1){
     	int x = WIDTH/2;
     	int xTengah = WIDTH/2;
@@ -79,14 +84,14 @@ int main() {
 
 	    	//printing ke kiri atas
 	    	if(x<20){break;}
-		    bresLine(x,y,x-20,y-10,3);
+		    bres_line(x,y,x-20,y-10,3);
 		    x -= 2;
 
 		    //printing ke atas
-		    bresLine(xTengah,y,xTengah,y-10,10);
+		    bres_line(xTengah,y,xTengah,y-10,10);
 
 		    //printing ke kanan atas
-		    bresLine(xKanan,y,xKanan+20,y-10, 5);
+		    bres_line(xKanan,y,xKanan+20,y-10, 5);
 		    xKanan += 2;
 		    
 		    usleep(1000);
@@ -135,15 +140,34 @@ void init(){
 }
 
 //clearScreen
-void clearScreen() {
+void clearScreen() {	//BackGround Screen
     for (int h = 0; h < HEIGHT; h++){
         for (int w = 0; w < WIDTH; w++) {
-            printPixel(w,h,255);
+			switch (bg[h][w]){
+				case '0': printpixelBG(w,h,0,0,0); break;
+				case '1': printpixelBG(w,h,255,255,255); break;
+				case '2': printpixelBG(w,h,255,255,0); break;
+				case '3': printpixelBG(w,h,0,255,255); break;
+				case '4': printpixelBG(w,h,0,255,0); break;
+				case '5': printpixelBG(w,h,220,220,220); break;
+			}
         }
     }
 }
 
-void printPixel(int x, int y, int color){
+void printpixelBG(int x, int y, int colorR, int colorG, int colorB){	//Print Pixel Color using RGB
+    location = (x+vinfo.xoffset) * (vinfo.bits_per_pixel/8) +
+                       (y+vinfo.yoffset) * finfo.line_length;
+
+    if (vinfo.bits_per_pixel == 32) {
+        *(fbp + location) = colorB;			//Blue Color
+        *(fbp + location + 1) = colorG;		//Green Color
+        *(fbp + location + 2) = colorR;		//Red Color
+        *(fbp + location + 3) = 0;			//Transparancy
+    }
+}
+
+void printpixel(int x, int y, int color){
     location = (x+vinfo.xoffset) * (vinfo.bits_per_pixel/8) +
                        (y+vinfo.yoffset) * finfo.line_length;
 
@@ -155,93 +179,48 @@ void printPixel(int x, int y, int color){
     }
 }
 
-void bresLine(int x1, int y1, int x2, int y2, int thickness){
-    int dx, dy, x, y, x_end, y_end, p, const1, const2, i;
+void bres_line(int x1, int y1, int x2, int y2, int thickness){
+    int dx, dy, x, y, x_end, p, const1, const2, i;
     for(i = 0; i < thickness; i++){
-	if(((x1-x2 > 0)&&(y1-y2 > 0))||((x1-x2 < 0)&&(y1-y2 < 0))){
-            dx = abs(x1-x2);
-            dy = abs(y1-y2);
+        dx = abs(x1-x2);
+        dy = abs(y1-y2);
     
-            p = 2 * dy - dx;
-            const1 = 2 * dy;
-            const2 = 2 * (dy-dx);
+        p = 2 * dy - dx;
+        const1 = 2 * dy;
+        const2 = 2 * (dy-dx);
 
-            if(x1 > x2){
-                x = x2 + i;
-                y = y2;
-                x_end = x1 + i;
-            }else{
-                x = x1 + i;
-                y = y1;
-                x_end = x2 + i;
-            }
-    
-            printPixel(x,y,0);
-            while(x < x_end){
-                x++;
-                if(p < 0){
-                    p = p + const1;
-                }else{
-                    y++;
-                    p = p + const2;
-                }
-        
-                printPixel(x,y,0);
-            }
-        }else if(((x1-x2 < 0)&&(y1-y2 > 0))||((x1-x2 > 0)&&(y1-y2 < 0))){ //gradien negatif
-            dx = abs(x1-x2);
-            dy = abs(y1-y2);
-    
-            p = 2 * dy - dx;
-            const1 = 2 * dy;
-            const2 = 2 * (dy-dx);
-
-            if(x1 > x2){
-                x = x2 + i;
-                y = y2;
-                x_end = x1 + i;
-            }else{
-                x = x1 + i;
-                y = y1;
-                x_end = x2 + i;
-            }
-    
-            printPixel(x,y,0);
-            while(x < x_end){
-                x++;
-                if(p < 0){
-                    p = p + const1;
-                }else{
-                    y--;
-                    p = p + const2;
-                }
-        
-                printPixel(x,y,0);
-            }
-        }else if(x1-x2 == 0){ //gradien tak hingga
-            y_end = (y1 > y2)? y1:y2;
-            y = (y1 > y2)? y2:y1;
-            for(int j=y; j<y_end; j++){
-                printPixel(x1+i,j,0);
-            }
-        }else if(y1-y2 == 0){ //gradien 0
-            x_end = (x1 > x2)? x1:x2;
-            x = (x1 > x2)? x2:x1;
-            for(int j=x; j<x_end; j++){
-                printPixel(j,y1+i,0);
-            }
+        if(x1 > x2){
+            x = x2 + i;
+            y = y2;
+            x_end = x1 + i;
+        }else{
+            x = x1 + i;
+            y = y1;
+            x_end = x2 + i;
         }
+    
+        printpixel(x,y,0);
+        while(x < x_end){
+            x++;
+            if(p < 0){
+                p = p + const1;
+            }else{
+                y++;
+                p = p + const2;
+            }
         
+            printpixel(x,y,0);
+        }
     }
 }
 
 void printPesawat(int kolom, int banyakBaris, int banyakKolom){
 	int i,j;
-	int y = 300, x = kolom;
+	int y = 0, x = kolom;
 	for(i=0;i<banyakBaris;i++){
 		for(j=0;j<banyakKolom;j++){
 			char kar = a[i][j];
-			if(kar=='0'){printPixel(x,y,0);}
+			if(kar=='0'){printpixel(x,y,0);}
 			x++;
 		}
 		y++;
