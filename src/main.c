@@ -35,17 +35,19 @@ void clearScreen();
 void printpixelBG(int x, int y, int colorR, int colorG, int colorB);
 void printpixel(int x, int y, int color);
 void bres_line(int x1, int y1, int x2, int y2, int thickness);
-void printPesawat(int kolom, int banyakBaris, int banyakKolom);
+void printPesawat(int kolom, int baris, int banyakBaris, int banyakKolom);
+void printTank(int kolom, int baris, int banyakBaris, int banyakKolom);
 
 char a[1000][1000];
 char bg[1000][1000];
+char tank[1000][1000];
 
 int main() {
     // Open the file for reading and writing
 
     init();   
-    FILE *fp, *fbg;
-    int i,j;
+    FILE *fp, *fbg, *ftank;
+    int i,j,k;
     
     fbg = fopen("../background.txt","r");
     if (fbg == NULL){
@@ -58,6 +60,7 @@ int main() {
 			i++;
 		}
 	}
+
     fp = fopen("../outputJet.txt","r");
     if(fp==NULL){
     	printf("File tidak ada\n");
@@ -68,8 +71,20 @@ int main() {
     	i++;
     }
 
+    ftank = fopen("../tank.txt","r");
+    if(fp==NULL){
+        printf("File tidak ada\n");
+        return 0;
+    }
+    k = 0;
+    while(fscanf(ftank, "%s", tank[k])!=EOF){
+        k++;
+    }
+
     int idx = i;
     int ukuranBaris = idx, ukuranKolom = strlen(a[0]);
+    int barisTank = k;
+    int kolomTank = strlen(tank[0]);
     clearScreen();
     int kolom = 700;
     while(1){
@@ -78,7 +93,9 @@ int main() {
     	int xKanan = WIDTH/2;
 	    for (int y = HEIGHT; y >100; y--) {
 	    	clearScreen();
-	    	printPesawat(kolom,ukuranBaris,ukuranKolom);
+            printTank(xTengah-(kolomTank/2),HEIGHT-barisTank-10,barisTank,kolomTank);
+            printf("%d \n",kolomTank);///////////////////////////////////////////////////////////
+	    	printPesawat(kolom,2*ukuranBaris,ukuranBaris,ukuranKolom);
 	    	kolom--;
 	    	if(kolom<0){kolom=700;}
 
@@ -214,9 +231,9 @@ void bres_line(int x1, int y1, int x2, int y2, int thickness){
     }
 }
 
-void printPesawat(int kolom, int banyakBaris, int banyakKolom){
+void printPesawat(int kolom, int baris, int banyakBaris, int banyakKolom){
 	int i,j;
-	int y = 0, x = kolom;
+	int y = baris, x = kolom;
 	for(i=0;i<banyakBaris;i++){
 		for(j=0;j<banyakKolom;j++){
 			char kar = a[i][j];
@@ -226,4 +243,18 @@ void printPesawat(int kolom, int banyakBaris, int banyakKolom){
 		y++;
 		x = kolom;
 	}
+}
+////////////////////////////////////////////////////////////////////
+void printTank(int kolom, int baris, int banyakBaris, int banyakKolom){
+    int i,j;
+    int y = baris, x = kolom;
+    for(i=0;i<banyakBaris;i++){
+        for(j=0;j<banyakKolom;j++){
+            char kar = tank[i][j];
+            if(kar=='0'){printpixelBG(x,y,20,80,20);}
+            x++;
+        }
+        y++;
+        x = kolom;
+    }
 }
