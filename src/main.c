@@ -33,8 +33,8 @@ long int location = 0;
 void init();
 void clearScreen();
 void printpixelBG(int x, int y, int colorR, int colorG, int colorB);
-void printpixel(int x, int y, int color);
-void bres_line(int x1, int y1, int x2, int y2, int thickness);
+void printPixel(int x, int y, int color);
+void bresLine(int x1, int y1, int x2, int y2, int thickness);
 void printPesawat(int kolom, int baris, int banyakBaris, int banyakKolom);
 void printTank(int kolom, int baris, int banyakBaris, int banyakKolom);
 
@@ -91,24 +91,26 @@ int main() {
     	int x = WIDTH/2;
     	int xTengah = WIDTH/2;
     	int xKanan = WIDTH/2;
+	int yPeluruTengah = HEIGHT;
 	    for (int y = HEIGHT; y >100; y--) {
 	    	clearScreen();
             printTank(xTengah-(kolomTank/2),HEIGHT-barisTank-10,barisTank,kolomTank);
             printf("%d \n",kolomTank);///////////////////////////////////////////////////////////
-	    	printPesawat(kolom,2*ukuranBaris,ukuranBaris,ukuranKolom);
+	    	printPesawat(kolom,4*ukuranBaris,ukuranBaris,ukuranKolom);
 	    	kolom--;
 	    	if(kolom<0){kolom=700;}
 
 	    	//printing ke kiri atas
 	    	if(x<20){break;}
-		    bres_line(x,y,x-20,y-10,3);
+		    bresLine(x,y,x-20,y-10,3);
 		    x -= 2;
-
-		    //printing ke atas
-		    bres_line(xTengah,y,xTengah,y-10,10);
-
+                    if(yPeluruTengah >= 30){
+		        //printing ke atas
+		        bresLine(xTengah,yPeluruTengah,xTengah,yPeluruTengah-30,10);
+                        yPeluruTengah-=3;
+                    }
 		    //printing ke kanan atas
-		    bres_line(xKanan,y,xKanan+20,y-10, 5);
+		    bresLine(xKanan,y,xKanan+20,y-10, 5);
 		    xKanan += 2;
 		    
 		    usleep(1000);
@@ -184,7 +186,7 @@ void printpixelBG(int x, int y, int colorR, int colorG, int colorB){	//Print Pix
     }
 }
 
-void printpixel(int x, int y, int color){
+void printPixel(int x, int y, int color){
     location = (x+vinfo.xoffset) * (vinfo.bits_per_pixel/8) +
                        (y+vinfo.yoffset) * finfo.line_length;
 
@@ -196,38 +198,83 @@ void printpixel(int x, int y, int color){
     }
 }
 
-void bres_line(int x1, int y1, int x2, int y2, int thickness){
-    int dx, dy, x, y, x_end, p, const1, const2, i;
+void bresLine(int x1, int y1, int x2, int y2, int thickness){
+    int dx, dy, x, y, x_end, y_end, p, const1, const2, i;
     for(i = 0; i < thickness; i++){
-        dx = abs(x1-x2);
-        dy = abs(y1-y2);
+	if(((x1-x2 > 0)&&(y1-y2 > 0))||((x1-x2 < 0)&&(y1-y2 < 0))){
+            dx = abs(x1-x2);
+            dy = abs(y1-y2);
     
-        p = 2 * dy - dx;
-        const1 = 2 * dy;
-        const2 = 2 * (dy-dx);
+            p = 2 * dy - dx;
+            const1 = 2 * dy;
+            const2 = 2 * (dy-dx);
 
-        if(x1 > x2){
-            x = x2 + i;
-            y = y2;
-            x_end = x1 + i;
-        }else{
-            x = x1 + i;
-            y = y1;
-            x_end = x2 + i;
-        }
-    
-        printpixel(x,y,0);
-        while(x < x_end){
-            x++;
-            if(p < 0){
-                p = p + const1;
+            if(x1 > x2){
+                x = x2 + i;
+                y = y2;
+                x_end = x1 + i;
             }else{
-                y++;
-                p = p + const2;
+                x = x1 + i;
+                y = y1;
+                x_end = x2 + i;
             }
+    
+            printPixel(x,y,0);
+            while(x < x_end){
+                x++;
+                if(p < 0){
+                    p = p + const1;
+                }else{
+                    y++;
+                    p = p + const2;
+                }
         
-            printpixel(x,y,0);
+                printPixel(x,y,0);
+            }
+        }else if(((x1-x2 < 0)&&(y1-y2 > 0))||((x1-x2 > 0)&&(y1-y2 < 0))){ //gradien negatif
+            dx = abs(x1-x2);
+            dy = abs(y1-y2);
+    
+            p = 2 * dy - dx;
+            const1 = 2 * dy;
+            const2 = 2 * (dy-dx);
+
+            if(x1 > x2){
+                x = x2 + i;
+                y = y2;
+                x_end = x1 + i;
+            }else{
+                x = x1 + i;
+                y = y1;
+                x_end = x2 + i;
+            }
+    
+            printPixel(x,y,0);
+            while(x < x_end){
+                x++;
+                if(p < 0){
+                    p = p + const1;
+                }else{
+                    y--;
+                    p = p + const2;
+                }
+        
+                printPixel(x,y,0);
+            }
+        }else if(x1-x2 == 0){ //gradien tak hingga
+            y_end = (y1 > y2)? y1:y2;
+            y = (y1 > y2)? y2:y1;
+            for(int j=y; j<y_end; j++){
+                printPixel(x1+i,j,0);
+            }
+        }else if(y1-y2 == 0){ //gradien 0
+            x_end = (x1 > x2)? x1:x2;
+            x = (x1 > x2)? x2:x1;
+            for(int j=x; j<x_end; j++){
+                printPixel(j,y1+i,0);
+            }
         }
+        
     }
 }
 
@@ -237,7 +284,7 @@ void printPesawat(int kolom, int baris, int banyakBaris, int banyakKolom){
 	for(i=0;i<banyakBaris;i++){
 		for(j=0;j<banyakKolom;j++){
 			char kar = a[i][j];
-			if(kar=='0'){printpixel(x,y,0);}
+			if(kar=='0'){printPixel(x,y,0);}
 			x++;
 		}
 		y++;
