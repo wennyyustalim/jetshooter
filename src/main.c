@@ -91,11 +91,10 @@ int main() {
     	int x = WIDTH/2;
     	int xTengah = WIDTH/2;
     	int xKanan = WIDTH/2;
-	int yPeluruTengah = HEIGHT;
+		int yPeluruTengah = HEIGHT;
 	    for (int y = HEIGHT; y >100; y--) {
 	    	clearScreen();
             printTank(xTengah-(kolomTank/2),HEIGHT-barisTank-10,barisTank,kolomTank);
-            printf("%d \n",kolomTank);///////////////////////////////////////////////////////////
 	    	printPesawat(kolom,4*ukuranBaris,ukuranBaris,ukuranKolom);
 	    	kolom--;
 	    	if(kolom<0){kolom=700;}
@@ -284,21 +283,37 @@ void printPesawat(int kolom, int baris, int banyakBaris, int banyakKolom){
 	for(i=0;i<banyakBaris;i++){
 		for(j=0;j<banyakKolom;j++){
 			char kar = a[i][j];
-			if(kar=='0'){printPixel(x,y,0);}
+			if(kar=='0'){
+				printPixel(x,y,0);
+			} else {
+				if(kar=='2'){
+					printPixel(x,y,255);
+				} else {
+					if(kar=='3'){
+						printpixelBG(x,y,24,0,124);
+					}
+				}
+			}
 			x++;
 		}
 		y++;
 		x = kolom;
 	}
 }
-////////////////////////////////////////////////////////////////////
+
 void printTank(int kolom, int baris, int banyakBaris, int banyakKolom){
     int i,j;
     int y = baris, x = kolom;
     for(i=0;i<banyakBaris;i++){
         for(j=0;j<banyakKolom;j++){
             char kar = tank[i][j];
-            if(kar=='0'){printpixelBG(x,y,20,80,20);}
+            if(kar=='0'){
+        		printpixelBG(x,y,20,80,20);
+        	} else {
+        		if(kar=='2'){
+        			printPixel(x,y,0);
+        		}
+        	}
             x++;
         }
         y++;
